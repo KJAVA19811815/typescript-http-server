@@ -5,8 +5,14 @@ console.log("Logs from your program will appear here!");
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
-    console.log('data from socket inbound', data.toString());
-    socket.write(Buffer.from(`HTTP/1.1 200 OK\r\n\r\n`));
+    const [method, path, version] = data.toString().split(' ');
+    if (path === '/') {
+      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\n\r\nHello World`));
+      return;
+    } else {
+      socket.write(Buffer.from(`HTTP/1.1 404 Not Found\r\n\r\n`));
+      return;
+    }
   })
   socket.on("close", () => {
     console.log('closing connection')

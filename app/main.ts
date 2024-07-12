@@ -6,8 +6,11 @@ console.log("Logs from your program will appear here!");
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
     const [method, path, version] = data.toString().split(' ');
-    if (path === '/') {
-      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\n\r\nHello World`));
+    console.log('PATH', path, path.includes('echo'), path.split('/'));
+    const splitPath = path.split('/')
+    const route = splitPath[splitPath.length - 1]
+    if (path.includes('echo')) {
+      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${route.length}\r\n\r\n${route}`));
       return;
     } else {
       socket.write(Buffer.from(`HTTP/1.1 404 Not Found\r\n\r\n`));

@@ -9,7 +9,7 @@ const server = net.createServer((socket) => {
     console.log('PATH', path, path.includes('echo'), path.split('/'));
     const splitPath = path.split('/')
     const route = splitPath[splitPath.length - 1]
-    if (path.includes('echo')) {
+    if (path.includes('echo') || path === '/') {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${route.length}\r\n\r\n${route}`));
       return;
     } else {

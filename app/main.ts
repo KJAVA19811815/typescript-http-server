@@ -6,7 +6,7 @@ const server = net.createServer((socket) => {
     const inputData = data.toString().split(' ');
     console.log('inputData', inputData)
     const path = inputData[1];
-    const userAgent = inputData[5];
+    const userAgent = inputData[inputData.length - 1];
     console.log('AGENT', userAgent)
     const userAgentTrimmed = userAgent ? userAgent.trim() : '';
     console.log('AGENT 2', userAgentTrimmed.length)

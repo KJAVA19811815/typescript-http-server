@@ -6,10 +6,14 @@ const server = net.createServer((socket) => {
     const inputData = data.toString().split(' ');
     console.log('inputData', inputData)
     const path = inputData[1];
-    const userAgent = inputData[inputData.length - 1];
-    console.log('AGENT 0', userAgent, userAgent.length)
-    const userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, '');
-    console.log('AGENT 1', userAgentTrimmed, userAgentTrimmed.length)
+    let userAgent = '';
+    let userAgentTrimmed = '';
+    if (data.toString().includes('User-Agent')) {
+      userAgent = inputData[inputData.length - 1];
+      console.log('AGENT 0', userAgent, userAgent.length)
+      userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, '');
+      console.log('AGENT 1', userAgentTrimmed, userAgentTrimmed.length)
+    }
     const splitPath = path.split('/')
     const route = splitPath[1]
     if (route.includes('echo') || route.includes('user-agent') || route === '/') {

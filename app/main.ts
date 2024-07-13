@@ -7,11 +7,9 @@ const server = net.createServer((socket) => {
     console.log('inputData', inputData)
     const path = inputData[1];
     const userAgent = inputData[inputData.length - 1];
-    console.log('AGENT 0', userAgent)
-    let pattern = /\*\/\*\\r\\n\\r\\n/g;
-    let userAgentTrimmed = userAgent.replace(pattern, '');
-    console.log('AGENT 1', userAgent, userAgentTrimmed)
-    console.log('AGENT 2', userAgent.length, userAgentTrimmed.length)
+    console.log('AGENT 0', userAgent, userAgent.length)
+    const userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, '');
+    console.log('AGENT 1', userAgentTrimmed, userAgentTrimmed.length)
     const splitPath = path.split('/')
     const route = splitPath[1]
     if (route.includes('echo') || route.includes('user-agent') || route === '/') {

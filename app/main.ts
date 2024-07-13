@@ -2,44 +2,37 @@ import * as net from "net";
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
-    console.log("data received", data.toString());
-    const inputData = data.toString().split(" ");
-    console.log("inputData", inputData);
+    console.log('data received', data.toString())
+    const inputData = data.toString().split(' ');
+    console.log('inputData', inputData)
     const path = inputData[1];
-    let userAgent = "";
-    let userAgentTrimmed = "";
-    if (data.toString().includes("User-Agent")) {
+    let userAgent = '';
+    let userAgentTrimmed = '';
+    const isUserAgentPresent = data.toString().includes('User-Agent');
+    if (isUserAgentPresent) {
       userAgent = inputData[inputData.length - 1];
-      console.log("AGENT 0", userAgent, userAgent.length);
-      userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, "");
-      console.log("AGENT 1", userAgentTrimmed, userAgentTrimmed.length);
+      console.log('AGENT 0', userAgent, userAgent.length)
+      userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, '');
+      console.log('AGENT 1', userAgentTrimmed, userAgentTrimmed.length)
     }
-    const splitPath = path.split("/");
-    const route = splitPath[1];
-    console.log("route", route);
-    const showUserAgentLengthOrPathLength = data
-      .toString()
-      .includes("User-Agent")
-      ? userAgentTrimmed.length
-      : path.length;
-    if (
-      route.includes("echo") ||
-      route.includes("user-agent") ||
-      route === "/"
-    ) {
-      socket.write(
-        Buffer.from(
-          `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${showUserAgentLengthOrPathLength}`
-        )
-      );
+    const splitPath = path.split('/')
+    const route = splitPath[1]
+    if (isUserAgentPresent) {
+      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
+      return;
+    } else if (route.includes('echo') && !isUserAgentPresent) {
+      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${route.length}\r\n\r\n${route}`));
+      return;
+    } else if (path === '/') {
+      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\n\r\nHello World`));
       return;
     } else {
       socket.write(Buffer.from(`HTTP/1.1 404 Not Found\r\n\r\n`));
       return;
     }
-  });
+  })
   socket.on("close", () => {
-    console.log("closing connection");
+    console.log('closing connection')
     socket.end();
   });
 });

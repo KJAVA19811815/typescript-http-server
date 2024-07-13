@@ -19,6 +19,7 @@ const server = net.createServer((socket) => {
     console.log('splitPath', splitPath)
     const route = splitPath[splitPath.length - 1]
     console.log('route', route)
+    console.log('CONDITIONS', isUserAgentPresent, route.includes('echo'), path === '/')
     if (isUserAgentPresent) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;

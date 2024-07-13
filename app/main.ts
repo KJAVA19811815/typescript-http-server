@@ -7,11 +7,12 @@ const server = net.createServer((socket) => {
     console.log('inputData', inputData)
     const path = inputData[1];
     const userAgent = inputData[5];
+    const userAgentTrimmed = userAgent ? userAgent.trim() : '';
     const accpetableRoutes = ['/', '/echo', 'user-agent'];
     const splitPath = path.split('/')
     const route = splitPath[splitPath.length - 1]
     if (accpetableRoutes.includes(route)) {
-      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgent.trim().length}\r\n\r\n${userAgent}`));
+      socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgent}`));
       return;
     } else {
       socket.write(Buffer.from(`HTTP/1.1 404 Not Found\r\n\r\n`));

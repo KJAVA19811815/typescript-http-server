@@ -22,7 +22,7 @@ const server = net.createServer((socket) => {
     if (isUserAgentPresent) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
-    } else if (route.includes('echo') && !isUserAgentPresent) {
+    } else if (route.includes('echo')) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${route.length}\r\n\r\n${route}`));
       return;
     } else if (path === '/') {

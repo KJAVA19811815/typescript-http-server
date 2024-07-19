@@ -37,7 +37,7 @@ const server = net.createServer((socket) => {
     } else if (inputData[0] === 'POST') {
       // const dataToWrite = inputData[inputData.length - 1].replace(/\r\n\r\n/g, '');
       const dataToWrite = extractBodyData(inputData);
-      console.log('dataToWrite', dataToWrite.join(', '))
+      console.log('dataToWrite', dataToWrite.join(' '))
       const fileName = inputData[1].split('/')[2];
       const args = process.argv.slice(2);
       const [___, absPath] = args;

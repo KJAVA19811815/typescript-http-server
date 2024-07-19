@@ -7,12 +7,22 @@ function extractBodyData(data: string[]): string[] {
   let startIndex = data.findIndex(item => item.includes(delimiter));
 
   if (startIndex !== -1) {
-    startIndex += 1;
+    startIndex;
   } else {
     startIndex = data.length;
   }
 
-  return data.slice(startIndex);
+  const newArray = data.slice(startIndex);
+  const final: string[] = []
+  newArray.map((text) => {
+    if (text.includes(delimiter)) {
+      const newValue = text.replace(`application/octet-stream${delimiter}`, '');
+      final.push(newValue);
+    } else {
+      final.push(text);
+    }
+  })
+  return final;
 }
 
 const server = net.createServer((socket) => {
@@ -35,16 +45,16 @@ const server = net.createServer((socket) => {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
     } else if (inputData[0] === 'POST') {
-      // const dataToWrite = inputData[inputData.length - 1].replace(/\r\n\r\n/g, '');
       const dataToWrite = extractBodyData(inputData);
-      console.log('dataToWrite', dataToWrite.join(' '))
+      // console.log('dataToWrite 1', dataToWrite)
+      // console.log('dataToWrite 2', dataToWrite.join(' '))
       const fileName = inputData[1].split('/')[2];
       const args = process.argv.slice(2);
       const [___, absPath] = args;
       const filePath = absPath + fileName;
       console.log('args', args, filePath)
       try {
-        fs.writeFileSync(filePath, dataToWrite.join(', '), 'utf-8');
+        fs.writeFileSync(filePath, dataToWrite.join(' '), 'utf-8');
         console.log(`File written successfully to ${filePath}`);
         socket.write(Buffer.from("HTTP/1.1 201 Created\r\n\r\n"))
       } catch (err) {

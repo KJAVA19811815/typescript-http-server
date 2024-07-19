@@ -17,7 +17,7 @@ const server = net.createServer((socket) => {
     const splitPath = path.split('/')
     const route = splitPath[splitPath.length - 1]
     if (isUserAgentPresent) {
-    // if (false) {å
+    // if (false) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
     } else if (path.includes('echo')) {
@@ -29,11 +29,10 @@ const server = net.createServer((socket) => {
     } else if (path.includes('files')) {
       const fileNameFromPath = inputData[1].split('/')[2];
       console.log('fileNameFromPath', fileNameFromPath)
-      const filePath = `/tmp/${fileNameFromPath}`;
-      const exists = fs.existsSync(filePath);
+      const exists = fs.existsSync(fileNameFromPath);
       console.log('exists', exists)
       if (exists) {
-        fs.readFile(filePath, (err, fileContents) => {
+        fs.readFile(fileNameFromPath, (err, fileContents) => {
           socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${fileContents.toString().length}\r\n\r\n${fileContents.toString()}`));
         });
       } else {

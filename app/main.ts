@@ -1,4 +1,5 @@
 import * as net from "net";
+import * as fs from 'fs';
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
@@ -11,16 +12,12 @@ const server = net.createServer((socket) => {
     const isUserAgentPresent = data.toString().includes('User-Agent');
     if (isUserAgentPresent) {
       userAgent = inputData[inputData.length - 1];
-      console.log('AGENT 0', userAgent, userAgent.length)
       userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, '');
-      console.log('AGENT 1', userAgentTrimmed, userAgentTrimmed.length)
     }
     const splitPath = path.split('/')
-    console.log('splitPath', splitPath)
     const route = splitPath[splitPath.length - 1]
-    console.log('route', route)
-    console.log('CONDITIONS', isUserAgentPresent, route.includes('echo'), path === '/')
     if (isUserAgentPresent) {
+    // if (false) {å
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
     } else if (path.includes('echo')) {
@@ -28,6 +25,20 @@ const server = net.createServer((socket) => {
       return;
     } else if (path === '/') {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\n\r\nHello World`));
+      return;
+    } else if (path.includes('files')) {
+      const fileNameFromPath = inputData[1].split('/')[2];
+      console.log('fileNameFromPath', fileNameFromPath)
+      const filePath = `/tmp/${fileNameFromPath}`;
+      const exists = fs.existsSync(filePath);
+      console.log('exists', exists)
+      if (exists) {
+        fs.readFile(filePath, (err, fileContents) => {
+          socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${fileContents.toString().length}\r\n\r\n${fileContents.toString()}`));
+        });
+      } else {
+        socket.write(Buffer.from("HTTP/1.1 404 Not Found\r\n\r\n"));
+      }
       return;
     } else {
       socket.write(Buffer.from(`HTTP/1.1 404 Not Found\r\n\r\n`));

@@ -20,6 +20,21 @@ const server = net.createServer((socket) => {
     // if (false) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
+    } else if (inputData[0] === 'POST') {
+      const dataToWrite = inputData[inputData.length - 1].replace(/\r\n\r\n/g, '');
+      const fileName = inputData[1].split('/')[2];
+      const args = process.argv.slice(2);
+      const [___, absPath] = args;
+      const filePath = absPath + fileName;
+      console.log('args', args, filePath)
+      try {
+        fs.writeFileSync(filePath, dataToWrite, 'utf-8');
+        console.log(`File written successfully to ${filePath}`);
+        socket.write(Buffer.from("HTTP/1.1 201 Created\r\n\r\n"))
+      } catch (err) {
+        console.error('Error writing file:', err);
+      }
+      return;
     } else if (path.includes('echo')) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${route.length}\r\n\r\n${route}`));
       return;

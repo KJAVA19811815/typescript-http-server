@@ -1,6 +1,20 @@
 import * as net from "net";
 import * as fs from 'fs';
 
+function extractBodyData(data: string[]): string[] {
+  // Find the index of the delimiter "\r\n\r\n"
+  const delimiter = "\r\n\r\n";
+  let startIndex = data.findIndex(item => item.includes(delimiter));
+
+  if (startIndex !== -1) {
+    startIndex += 1;
+  } else {
+    startIndex = data.length;
+  }
+
+  return data.slice(startIndex);
+}
+
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
     console.log('data received', data.toString())
@@ -21,14 +35,16 @@ const server = net.createServer((socket) => {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
     } else if (inputData[0] === 'POST') {
-      const dataToWrite = inputData[inputData.length - 1].replace(/\r\n\r\n/g, '');
+      // const dataToWrite = inputData[inputData.length - 1].replace(/\r\n\r\n/g, '');
+      const dataToWrite = extractBodyData(inputData);
+      console.log('dataToWrite', dataToWrite.join(', '))
       const fileName = inputData[1].split('/')[2];
       const args = process.argv.slice(2);
       const [___, absPath] = args;
       const filePath = absPath + fileName;
       console.log('args', args, filePath)
       try {
-        fs.writeFileSync(filePath, dataToWrite, 'utf-8');
+        fs.writeFileSync(filePath, dataToWrite.join(', '), 'utf-8');
         console.log(`File written successfully to ${filePath}`);
         socket.write(Buffer.from("HTTP/1.1 201 Created\r\n\r\n"))
       } catch (err) {

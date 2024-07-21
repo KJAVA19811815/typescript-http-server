@@ -25,6 +25,32 @@ function extractBodyData(data: string[]): string[] {
   return final;
 }
 
+function extractEncoding(data: string[]): string[] {
+  const delimiter = "Accept-Encoding:";
+  let startIndex = data.findIndex(item => item.includes(delimiter));
+  console.log('startIndex', startIndex)
+
+  if (startIndex !== -1) {
+    startIndex;
+  } else {
+    startIndex = data.length;
+  }
+
+  return data.slice(startIndex);
+}
+
+const findValidEncodings = (data: string[]): string | undefined => {
+  return data.find((encoding) => {
+    const removeCommaEncoding = encoding.replace(',', '').trim();
+    console.log('removeCommaEncoding', removeCommaEncoding, removeCommaEncoding === 'gzip');
+    if (removeCommaEncoding === 'gzip') {
+      console.log('valid encoding found');
+      return true;
+    }
+    return false;
+  });
+};
+
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
     console.log('data received', data.toString())
@@ -33,14 +59,18 @@ const server = net.createServer((socket) => {
     const path = inputData[1];
     let userAgent = '';
     let userAgentTrimmed = '';
+    const isAcceptEncodingPresent = data.toString().includes('Accept-Encoding');
     const isUserAgentPresent = data.toString().includes('User-Agent');
-    if (inputData[inputData.length - 2].includes('Accept-Encoding')) {
-      const contentEncoding = inputData[inputData.length - 1];
-      console.log('contentEncoding', contentEncoding.includes('invalid-encoding'))
-      if (contentEncoding.includes('invalid-encoding')) {
-        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`));
+    if (isAcceptEncodingPresent) {
+      const encodingList = extractEncoding(inputData);
+      const validEncoding = findValidEncodings(encodingList);
+      console.log('validEncodings', validEncoding)
+      if (validEncoding) {
+        console.log('1', validEncoding)
+        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\n\r\n`));
       } else {
-        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${contentEncoding}`));
+        console.log('2')
+        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`));
       }
       return
     } else if (isUserAgentPresent) {

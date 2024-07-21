@@ -34,7 +34,16 @@ const server = net.createServer((socket) => {
     let userAgent = '';
     let userAgentTrimmed = '';
     const isUserAgentPresent = data.toString().includes('User-Agent');
-    if (isUserAgentPresent) {
+    if (inputData[inputData.length - 2].includes('Accept-Encoding')) {
+      const contentEncoding = inputData[inputData.length - 1];
+      console.log('contentEncoding', contentEncoding.includes('invalid-encoding'))
+      if (contentEncoding.includes('invalid-encoding')) {
+        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain`));
+      } else {
+        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${contentEncoding}`));
+      }
+      return
+    } else if (isUserAgentPresent) {
       userAgent = inputData[inputData.length - 1];
       userAgentTrimmed = userAgent.replace(/\r\n\r\n/g, '');
     }
@@ -46,8 +55,6 @@ const server = net.createServer((socket) => {
       return;
     } else if (inputData[0] === 'POST') {
       const dataToWrite = extractBodyData(inputData);
-      // console.log('dataToWrite 1', dataToWrite)
-      // console.log('dataToWrite 2', dataToWrite.join(' '))
       const fileName = inputData[1].split('/')[2];
       const args = process.argv.slice(2);
       const [___, absPath] = args;
@@ -72,9 +79,7 @@ const server = net.createServer((socket) => {
       const args = process.argv.slice(2);
       const [___, absPath] = args;
       const filePath = absPath + "/" + fileName;
-      console.log('fileNameFromPath', fileName)
       const exists = fs.existsSync(filePath);
-      console.log('exists', exists)
       if (exists) {
         fs.readFile(filePath, (err, fileContents) => {
           socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: ${fileContents.toString().length}\r\n\r\n${fileContents.toString()}`));

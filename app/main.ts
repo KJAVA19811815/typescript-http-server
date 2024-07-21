@@ -38,7 +38,7 @@ const server = net.createServer((socket) => {
       const contentEncoding = inputData[inputData.length - 1];
       console.log('contentEncoding', contentEncoding.includes('invalid-encoding'))
       if (contentEncoding.includes('invalid-encoding')) {
-        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain`));
+        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n`));
       } else {
         socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${contentEncoding}`));
       }

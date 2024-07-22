@@ -29,7 +29,6 @@ function extractBodyData(data: string[]): string[] {
 function extractEncoding(data: string[]): string[] {
   const delimiter = "Accept-Encoding:";
   let startIndex = data.findIndex(item => item.includes(delimiter));
-  console.log('startIndex', startIndex)
 
   if (startIndex !== -1) {
     startIndex;
@@ -54,9 +53,7 @@ const findValidEncodings = (data: string[]): string | undefined => {
 
 const server = net.createServer((socket) => {
   socket.on("data", (data) => {
-    console.log('data received', data.toString())
     const inputData = data.toString().split(' ');
-    console.log('inputData', inputData)
     const path = inputData[1];
     let userAgent = '';
     let userAgentTrimmed = '';
@@ -65,25 +62,14 @@ const server = net.createServer((socket) => {
     if (isAcceptEncodingPresent) {
       const encodingList = extractEncoding(inputData);
       const validEncoding = findValidEncodings(encodingList);
-      console.log('validEncodings', validEncoding)
       if (validEncoding) {
         const splitPath = path.split('/')
         const route = splitPath[splitPath.length - 1]
         const buffer = Buffer.from(route, 'utf8');
         const zipped = zlib.gzipSync(buffer);
-        console.log('data to encode', route)
         socket.write(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length: ${zipped.length}\r\n\r\n`);
         socket.write(zipped);
-        // zlib.gzip(route, (err, buffer) => {
-        //   console.log('1', validEncoding)
-        //   console.log('gzip', buffer.toString().length)
-        //   console.log('buffer', buffer, buffer.toString())
-        //   socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\nContent-Length: ${buffer.length}\r\n\r\n`));
-        //   socket.write(buffer);
-        //   socket.end();
-        // })
       } else {
-        console.log('2')
         socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`));
       }
       return
@@ -94,7 +80,6 @@ const server = net.createServer((socket) => {
     const splitPath = path.split('/')
     const route = splitPath[splitPath.length - 1]
     if (isUserAgentPresent) {
-    // if (false) {
       socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${userAgentTrimmed.length}\r\n\r\n${userAgentTrimmed}`));
       return;
     } else if (inputData[0] === 'POST') {
@@ -103,7 +88,6 @@ const server = net.createServer((socket) => {
       const args = process.argv.slice(2);
       const [___, absPath] = args;
       const filePath = absPath + fileName;
-      console.log('args', args, filePath)
       try {
         fs.writeFileSync(filePath, dataToWrite.join(' '), 'utf-8');
         console.log(`File written successfully to ${filePath}`);

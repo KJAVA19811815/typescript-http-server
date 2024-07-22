@@ -71,11 +71,12 @@ const server = net.createServer((socket) => {
         const route = splitPath[splitPath.length - 1]
         console.log('data to encode', route)
         zlib.gzip(route, (err, buffer) => {
+          console.log('1', validEncoding)
           console.log('gzip', buffer.toString().length)
           console.log('buffer', buffer, buffer.toString())
-          socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\nContent-Length: ${buffer.toString().length}\r\n\r\n${buffer.toString()}`));
+          socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\nContent-Length: ${buffer.length}\r\n\r\n`));
+          // socket.write(buffer);
         })
-        console.log('1', validEncoding)
       } else {
         console.log('2')
         socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`));

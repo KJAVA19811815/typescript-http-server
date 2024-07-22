@@ -75,7 +75,8 @@ const server = net.createServer((socket) => {
           console.log('gzip', buffer.toString().length)
           console.log('buffer', buffer, buffer.toString())
           socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\nContent-Length: ${buffer.length}\r\n\r\n`));
-          // socket.write(buffer);
+          socket.write(buffer);
+          socket.end();
         })
       } else {
         console.log('2')

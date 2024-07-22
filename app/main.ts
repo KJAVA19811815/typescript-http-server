@@ -1,5 +1,6 @@
 import * as net from "net";
 import * as fs from 'fs';
+import * as zlib from 'zlib';
 
 function extractBodyData(data: string[]): string[] {
   // Find the index of the delimiter "\r\n\r\n"
@@ -66,8 +67,15 @@ const server = net.createServer((socket) => {
       const validEncoding = findValidEncodings(encodingList);
       console.log('validEncodings', validEncoding)
       if (validEncoding) {
+        const splitPath = path.split('/')
+        const route = splitPath[splitPath.length - 1]
+        console.log('data to encode', route)
+        zlib.gzip(route, (err, buffer) => {
+          console.log('gzip', buffer.toString().length)
+          console.log('buffer', buffer, buffer.toString())
+          socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\nContent-Length: ${buffer.toString().length}\r\n\r\n${buffer.toString()}`));
+        })
         console.log('1', validEncoding)
-        socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: ${validEncoding.replace(',', '')}\r\n\r\n`));
       } else {
         console.log('2')
         socket.write(Buffer.from(`HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n`));
